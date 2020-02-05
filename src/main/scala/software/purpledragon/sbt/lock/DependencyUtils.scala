@@ -21,7 +21,7 @@ import java.time.Instant
 import sbt._
 import software.purpledragon.sbt.lock.model.{DependencyLockFile, DependencyRef, ResolvedArtifact, ResolvedDependency}
 
-import scala.collection.{immutable, mutable, SortedSet}
+import scala.collection.{SortedSet, immutable, mutable}
 
 object DependencyUtils {
   def resolve(updateReport: UpdateReport, configs: Seq[ConfigRef]): DependencyLockFile = {
@@ -64,17 +64,8 @@ object DependencyUtils {
       module: ModuleReport,
       checksumCache: mutable.Map[File, String]): ResolvedDependency = {
 
-    val artifacts: immutable.Seq[ResolvedArtifact] = module.artifacts map {
-      case (artifact, file) =>
-        val hash = checksumCache.getOrElseUpdate(file, hashFile(file))
-
-        val qualifier = artifact.`type` match {
-          case "jar" | "bundle" => ""
-          case q => s"-$q"
-        }
-
-        ResolvedArtifact(s"${artifact.name}$qualifier.${artifact.extension}", hash)
-    }
+    val artifacts =
+      module.artifacts.map(ResolvedArtifact.apply(_, checksumCache))
 
     ResolvedDependency(
       module.module.organization,
@@ -83,6 +74,4 @@ object DependencyUtils {
       artifacts.to[SortedSet],
       SortedSet.empty)
   }
-
-  private def hashFile(file: File): String = s"sha1:${Hash.toHex(Hash(file))}"
 }
