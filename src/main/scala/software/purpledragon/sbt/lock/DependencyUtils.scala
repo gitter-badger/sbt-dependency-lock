@@ -21,7 +21,7 @@ import java.time.Instant
 import sbt._
 import software.purpledragon.sbt.lock.model.{DependencyLockFile, DependencyRef, ResolvedArtifact, ResolvedDependency}
 
-import scala.collection.{SortedSet, immutable, mutable}
+import scala.collection.{immutable, mutable, SortedSet}
 
 object DependencyUtils {
   def resolve(updateReport: UpdateReport, configs: Seq[ConfigRef]): DependencyLockFile = {
